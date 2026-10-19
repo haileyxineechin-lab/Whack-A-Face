@@ -44,7 +44,8 @@
                 <div class="avatar-face" id="avatarFace"></div>
                 <div class="splats" id="splats"></div>
               </div>
-              <div class="dizzy" id="dizzy" aria-hidden="true">💫</div>
+              <div class="dizzy" id="dizzy" aria-hidden="true"></div>
+              <div class="nameplate" id="nameplate" hidden></div>
             </div>
           </div>
 
@@ -61,12 +62,23 @@
       <aside class="panel">
         <div>
           <h2>Your character</h2>
-          <p>Attach any picture to use as the face. You can also drag one onto the play area or paste it.</p>
+          <p>Pick a character, give it a name, attach a photo, or mix them: a name works with a character or a photo.</p>
         </div>
 
-        <input class="file-input" type="file" id="photoInput" accept="image/*">
-        <label class="btn" for="photoInput">Attach a photo</label>
-        <button type="button" class="btn secondary" id="removePhoto" hidden>Use the default face</button>
+        <div class="group">
+          <span class="group-title" id="charsTitle">Choose a character</span>
+          <div class="chars" id="chars" role="group" aria-labelledby="charsTitle"></div>
+        </div>
+
+        <label class="field">Name (optional)
+          <input type="text" id="avatarName" maxlength="24" placeholder="Give it a name" autocomplete="off">
+        </label>
+
+        <div class="group">
+          <input class="file-input" type="file" id="photoInput" accept="image/*">
+          <label class="btn" for="photoInput">Attach a photo</label>
+          <button type="button" class="btn secondary" id="removePhoto" hidden>Remove my photo</button>
+        </div>
 
         <details class="adjust" id="adjust" hidden>
           <summary>Adjust photo</summary>
@@ -96,52 +108,6 @@
     </main>
   </div>
 
-  <template id="defaultFace">
-    <svg class="face-svg" data-mood="idle" viewBox="0 0 200 200" role="img" aria-label="Default cartoon face" preserveAspectRatio="xMidYMid slice">
-      <rect width="200" height="200" fill="#ffd35a"/>
-      <circle cx="42" cy="120" r="16" fill="#ff8a7a" opacity=".55"/>
-      <circle cx="158" cy="120" r="16" fill="#ff8a7a" opacity=".55"/>
-
-      <g class="mood m-idle">
-        <ellipse cx="70" cy="88" rx="9" ry="12" fill="#2a1f3d"/>
-        <ellipse cx="130" cy="88" rx="9" ry="12" fill="#2a1f3d"/>
-        <circle cx="73" cy="83" r="3.5" fill="#fff"/>
-        <circle cx="133" cy="83" r="3.5" fill="#fff"/>
-        <path class="ink" d="M52 64 Q70 54 88 64"/>
-        <path class="ink" d="M112 64 Q130 54 148 64"/>
-        <path class="ink" d="M70 136 Q100 158 130 136"/>
-      </g>
-
-      <g class="mood m-hurt">
-        <path class="ink" d="M56 76 L84 90 L56 104"/>
-        <path class="ink" d="M144 76 L116 90 L144 104"/>
-        <path class="ink" d="M48 60 L90 70"/>
-        <path class="ink" d="M152 60 L110 70"/>
-        <ellipse cx="100" cy="144" rx="17" ry="13" fill="#2a1f3d"/>
-        <ellipse cx="100" cy="150" rx="9" ry="5" fill="#ff7a8a"/>
-      </g>
-
-      <g class="mood m-squeeze">
-        <path class="ink" d="M56 88 Q70 100 84 88"/>
-        <path class="ink" d="M116 88 Q130 100 144 88"/>
-        <path class="ink" d="M62 144 q9 -12 19 0 t19 0 t19 0 t19 0"/>
-        <path d="M160 52 q9 13 0 20 q-9 -7 0 -20z" fill="#8fd3ff"/>
-      </g>
-
-      <g class="mood m-happy">
-        <path class="ink" d="M56 94 Q70 74 84 94"/>
-        <path class="ink" d="M116 94 Q130 74 144 94"/>
-        <path d="M64 122 Q100 174 136 122 Z" fill="#2a1f3d"/>
-        <path d="M82 150 Q100 138 118 150 Q100 166 82 150Z" fill="#ff7a8a"/>
-      </g>
-
-      <g class="mood m-dizzy">
-        <path class="ink" d="M58 76 L82 100 M82 76 L58 100"/>
-        <path class="ink" d="M118 76 L142 100 M142 76 L118 100"/>
-        <path class="ink" d="M62 142 q9 -10 19 0 t19 0 t19 0 t19 0"/>
-      </g>
-    </svg>
-  </template>
 
   <script src="script.js"></script>
 </body>
