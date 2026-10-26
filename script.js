@@ -1632,11 +1632,14 @@
 
   removeBtn.addEventListener('click', () => {
     store.del('photo');
+    store.del('adjust');
+    adjust.z = 1; adjust.x = 0; adjust.y = 0;
+    syncSliders();
     state.photo = null;
     state.mode = 'character';
     store.set('mode', 'character');
     refreshFace();
-    showToast('Photo removed.');
+    showToast('Photo deleted from this device.');
   });
 
   [zoomEl, panXEl, panYEl].forEach((el) => {
@@ -1906,6 +1909,22 @@
     surprise.textContent = 'Surprise me';
     surprise.addEventListener('click', randomAvatar);
     makerBody.appendChild(surprise);
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'btn secondary';
+    del.textContent = 'Delete my custom character';
+    del.addEventListener('click', () => {
+      store.del('custom');
+      state.custom = Object.assign({}, DEFAULT_CUSTOM);
+      if (state.character === 'custom') {
+        state.character = BUSTS[0].id;
+        store.set('character', state.character);
+      }
+      refreshFace();
+      showToast('Custom character deleted.');
+    });
+    makerBody.appendChild(del);
   }
 
   buildMaker();
