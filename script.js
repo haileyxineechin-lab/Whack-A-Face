@@ -16,6 +16,8 @@
   const toastEl = $('#toast');
   const fx = $('#fx');
   const fctx = fx.getContext('2d');
+  const namePlate = $('#nameplate');
+  const nameInput = $('#avatarName');
 
   const stressValue = $('#stressValue');
   const stressFill = $('#stressFill');
