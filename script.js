@@ -161,7 +161,390 @@
     return g('idle', idle) + g('hurt', hurt) + g('squeeze', squeeze) + g('happy', happy) + g('dizzy', dizzyMood) + g('stink', stink);
   }
 
-  const CHARACTERS = [
+  /* ------------------------------------------------------------------
+   * 3D clay-style characters (layered SVG with gradients, no emoji)
+   * ------------------------------------------------------------------ */
+  let svgUid = 0;
+
+  const SKINS = {
+    fair:   { base: '#f6d4bf', light: '#feeadb', dark: '#dca88a', blush: '#f4958a', nose: '#efa08e', noseLight: '#f9c1b3' },
+    light:  { base: '#f3c4a2', light: '#fde3cc', dark: '#d89a72', blush: '#f08f80', nose: '#eb9680', noseLight: '#f7b8a4' },
+    tan:    { base: '#eaa381', light: '#f8c9ab', dark: '#c27a58', blush: '#ee8670', nose: '#e5876d', noseLight: '#f2a58c' },
+    medium: { base: '#d99b74', light: '#eebb98', dark: '#b87650', blush: '#e58a70', nose: '#d4825f', noseLight: '#e6a283' },
+    brown:  { base: '#c18659', light: '#d9a477', dark: '#9a6340', blush: '#d77a58', nose: '#b87450', noseLight: '#d29672' },
+    deep:   { base: '#8d5b3d', light: '#aa7452', dark: '#643f29', blush: '#b8654a', nose: '#a45f42', noseLight: '#bd7a58' },
+  };
+
+  const HAIRS = {
+    black: { base: '#0e0d11', light: '#2d2c35', shine: '#7a7a8a', brow: '#16151c' },
+    brown: { base: '#2a1710', light: '#4b3025', shine: '#9a7560', brow: '#2a1710' },
+    blond: { base: '#d3a13f', light: '#f3d27f', shine: '#fff3c4', brow: '#8a6420' },
+    red:   { base: '#92351e', light: '#c85a38', shine: '#ffb392', brow: '#6e2614' },
+    grey:  { base: '#9a9aa6', light: '#d4d4dc', shine: '#ffffff', brow: '#6a6a78' },
+    pink:  { base: '#d44a8c', light: '#ff82bd', shine: '#ffd0e8', brow: '#9a2c63' },
+    blue:  { base: '#2b5fd9', light: '#6f9bff', shine: '#cfe0ff', brow: '#1c3f9a' },
+  };
+
+  const CLOTHS = {
+    yellow: { base: '#f1d53a', light: '#fff08c', dark: '#c9a91a' },
+    green:  { base: '#2fa56c', light: '#62d99c', dark: '#1d7a4d' },
+    orange: { base: '#f27d3a', light: '#ffab72', dark: '#c85a1f' },
+    purple: { base: '#7a5af0', light: '#a894ff', dark: '#5238b8' },
+    pink:   { base: '#f06292', light: '#ff9bbd', dark: '#c23f6c' },
+    red:    { base: '#e5484d', light: '#ff8286', dark: '#b52c31' },
+    teal:   { base: '#1fb5b0', light: '#5ee0da', dark: '#12857f' },
+    navy:   { base: '#3d4a8f', light: '#6c7bd1', dark: '#27306a' },
+    grey:   { base: '#8b92a3', light: '#bcc2d0', dark: '#5f6678' },
+    black:  { base: '#33333f', light: '#555566', dark: '#1a1a22' },
+  };
+
+  const BUSTS = [
+    { id: 'sunny', name: 'Sunny', gender: 'female',  bg: '#438ee0', skin: 'tan',    hair: 'black', hairStyle: 'longParted', outfit: 'halter', cloth: 'yellow' },
+    { id: 'kai',   name: 'Kai',   gender: 'male',    bg: '#ff8f6b', skin: 'light',  hair: 'black', hairStyle: 'shortSwoop', outfit: 'tee',    cloth: 'green' },
+    { id: 'nia',   name: 'Nia',   gender: 'female',  bg: '#2fb8a6', skin: 'deep',   hair: 'brown', hairStyle: 'afro',       outfit: 'tee',    cloth: 'orange' },
+    { id: 'omar',  name: 'Omar',  gender: 'male',    bg: '#ffd166', skin: 'medium', hair: 'black', hairStyle: 'buzz',       outfit: 'collar', cloth: 'teal', hat: 'songkok' },
+    { id: 'aisha', name: 'Aisha', gender: 'female',  bg: '#9fe0c8', skin: 'light',  hair: 'black', hairStyle: 'hijab',      outfit: 'tee',    cloth: 'purple' },
+    { id: 'leo',   name: 'Leo',   gender: 'male',    bg: '#f4a3b5', skin: 'fair',   hair: 'blond', hairStyle: 'curlyTop',   outfit: 'hoodie', cloth: 'navy' },
+    { id: 'ari',   name: 'Ari',   gender: 'female',  bg: '#9a8cf0', skin: 'medium', hair: 'red',   hairStyle: 'bob',        outfit: 'collar', cloth: 'pink' },
+    { id: 'ben',   name: 'Ben',   gender: 'male',    bg: '#4fb3a0', skin: 'brown',  hair: 'grey',  hairStyle: 'bald',       outfit: 'collar', cloth: 'grey', beard: true, glasses: true },
+    { id: 'mei',   name: 'Mei',   gender: 'female',  bg: '#7fcf6a', skin: 'light',  hair: 'black', hairStyle: 'buns',       outfit: 'tee',    cloth: 'red' },
+    { id: 'raj',   name: 'Raj',   gender: 'male',    bg: '#f6b26b', skin: 'brown',  hair: 'black', hairStyle: 'pompadour',  outfit: 'suit',   cloth: 'navy' },
+    { id: 'luna',  name: 'Luna',  gender: 'female',  bg: '#c9a7ff', skin: 'deep',   hair: 'black', hairStyle: 'braids',     outfit: 'tank',   cloth: 'pink' },
+    { id: 'sam',   name: 'Sam',   gender: 'neutral', bg: '#ffc9a8', skin: 'fair',   hair: 'pink',  hairStyle: 'shortSwoop', outfit: 'hoodie', cloth: 'green', glasses: true },
+    { id: 'zed',   name: 'Zed',   gender: 'male',    bg: '#2b2f5e', skin: 'tan',    hair: 'blue',  hairStyle: 'mohawk',     outfit: 'tee',    cloth: 'orange' },
+    { id: 'chloe', name: 'Chloe', gender: 'female',  bg: '#9ad1ff', skin: 'fair',   hair: 'brown', hairStyle: 'ponytail',   outfit: 'tee',    cloth: 'teal', hat: 'cap', freckles: true },
+  ];
+
+  function bustDefs(u, skin, hair, cloth) {
+    return '<defs>' +
+      `<radialGradient id="${u}-skin" cx="36%" cy="26%" r="90%"><stop offset="0" stop-color="${skin.light}"/><stop offset=".5" stop-color="${skin.base}"/><stop offset="1" stop-color="${skin.dark}"/></radialGradient>` +
+      `<linearGradient id="${u}-neck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${skin.dark}"/><stop offset="1" stop-color="${skin.base}"/></linearGradient>` +
+      `<radialGradient id="${u}-shade" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#000" stop-opacity=".34"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>` +
+      `<radialGradient id="${u}-blush" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${skin.blush}" stop-opacity=".8"/><stop offset="1" stop-color="${skin.blush}" stop-opacity="0"/></radialGradient>` +
+      `<radialGradient id="${u}-eye" cx="36%" cy="28%" r="85%"><stop offset="0" stop-color="#43435c"/><stop offset="1" stop-color="#090910"/></radialGradient>` +
+      `<radialGradient id="${u}-nose" cx="40%" cy="32%" r="75%"><stop offset="0" stop-color="${skin.noseLight}"/><stop offset="1" stop-color="${skin.nose}"/></radialGradient>` +
+      `<linearGradient id="${u}-hair" x1="0.1" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="${hair.light}"/><stop offset=".6" stop-color="${hair.base}"/><stop offset="1" stop-color="${hair.base}"/></linearGradient>` +
+      `<linearGradient id="${u}-cloth" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="${cloth.light}"/><stop offset="1" stop-color="${cloth.base}"/></linearGradient>` +
+      '</defs>';
+  }
+
+  /* ---------- hair ---------- */
+  function hairParts(u, key, h, cloth) {
+    const f = `url(#${u}-hair)`;
+    const sh = (d, w = 1.8, o = 0.5) => `<path d="${d}" fill="none" stroke="${h.shine}" stroke-opacity="${o}" stroke-width="${w}" stroke-linecap="round"/>`;
+    const bumps = (pts) => `<g fill="${f}">${pts.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g>`;
+    switch (key) {
+      case 'longParted':
+        return {
+          back: `<path d="M100 12 C58 10 30 40 27 84 C25 120 22 156 8 200 L192 200 C178 156 175 120 173 84 C170 40 142 10 100 12Z" fill="${f}"/>` +
+            sh('M40 120 C36 150 30 176 22 196', 1.6, 0.35) + sh('M160 118 C164 150 170 176 178 196', 1.6, 0.35),
+          front: `<path d="M108 17 C80 17 60 35 56 66 C53 88 57 104 51 128 C46 146 40 168 27 200 L57 200 C63 174 73 150 70 122 C68 98 63 84 70 63 C76 44 94 30 108 28Z" fill="${f}"/>` +
+            `<path d="M108 17 C134 17 153 35 156 64 C159 86 153 104 158 126 C163 146 167 170 175 200 L147 200 C145 174 137 150 140 122 C142 100 146 84 139 64 C133 44 120 30 108 28Z" fill="${f}"/>` +
+            sh('M98 22 C78 27 63 44 61 66 C59 88 62 104 57 126 C54 142 50 160 42 182', 1.8, 0.55) +
+            sh('M118 22 C138 28 151 44 152 66 C153 86 150 102 153 124 C156 142 160 162 166 182', 1.8, 0.45) +
+            sh('M88 20 C74 26 66 36 64 48', 1.4, 0.5),
+        };
+      case 'shortSwoop':
+        return {
+          back: '',
+          front: `<path d="M57 78 C50 42 72 14 104 14 C136 14 152 38 144 76 C142 62 134 50 118 46 C104 56 84 56 70 56 C64 62 60 70 57 78Z" fill="${f}"/>` +
+            `<path d="M57 78 C55 70 56 62 60 56 C62 66 62 72 57 78Z" fill="${f}"/>` +
+            sh('M70 36 C84 24 106 22 124 30', 1.8, 0.6) + sh('M64 52 C72 38 88 30 104 30', 1.4, 0.45),
+        };
+      case 'afro':
+        return {
+          back: bumps([[100, 52, 46], [58, 66, 30], [142, 66, 30], [72, 34, 26], [128, 34, 26], [46, 94, 18], [154, 94, 18]]) +
+            sh('M70 24 C80 16 96 14 108 16', 2, 0.5) + sh('M30 56 C34 44 42 36 54 32', 2, 0.4),
+          front: `<path d="M58 70 C58 44 78 32 100 32 C122 32 142 44 142 70 C132 54 118 48 100 48 C82 48 68 54 58 70Z" fill="${f}"/>`,
+        };
+      case 'curlyLong':
+        return {
+          back: bumps([[100, 40, 40], [66, 44, 26], [134, 44, 26], [44, 72, 24], [156, 72, 24], [38, 102, 24], [162, 102, 24], [40, 132, 23], [160, 132, 23], [44, 162, 22], [156, 162, 22], [50, 188, 20], [150, 188, 20]]) +
+            sh('M52 40 C64 28 80 24 94 26', 2, 0.45),
+          front: `<path d="M58 72 C58 44 78 30 100 30 C122 30 142 44 142 72 C132 54 118 48 100 48 C82 48 68 54 58 72Z" fill="${f}"/>` +
+            bumps([[58, 80, 12], [142, 80, 12]]),
+        };
+      case 'hijab': {
+        const outer = 'M100 10 C50 10 24 48 26 96 C28 132 38 152 32 200 L168 200 C162 152 172 132 174 96 C176 48 150 10 100 10Z';
+        const inner = 'M100 36 C126 36 141 56 141 82 C141 106 124 124 100 124 C76 124 59 106 59 82 C59 56 74 36 100 36Z';
+        return {
+          back: '',
+          front: `<path fill-rule="evenodd" d="${outer} ${inner}" fill="url(#${u}-cloth)"/>` +
+            `<path d="${inner}" fill="none" stroke="${cloth.dark}" stroke-opacity=".35" stroke-width="3"/>` +
+            `<path d="M40 150 C70 160 100 150 100 150 C100 150 130 160 160 150" fill="none" stroke="${cloth.dark}" stroke-opacity=".3" stroke-width="2"/>` +
+            `<path d="M44 80 C46 56 62 30 94 20" fill="none" stroke="${cloth.light}" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round"/>` +
+            `<path d="M156 80 C154 56 138 30 106 20" fill="none" stroke="${cloth.light}" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/>` +
+            `<path d="M50 150 C56 168 54 184 52 196" fill="none" stroke="${cloth.dark}" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>` +
+            `<path d="M150 150 C144 168 146 184 148 196" fill="none" stroke="${cloth.dark}" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>`,
+          noNeck: true, noHat: true,
+        };
+      }
+      case 'curlyTop':
+        return {
+          back: '',
+          front: bumps([[70, 46, 15], [90, 34, 16], [112, 33, 16], [132, 44, 15], [64, 64, 11], [138, 64, 11], [100, 46, 18]]) +
+            sh('M72 36 C80 28 90 24 100 24', 1.6, 0.6) + sh('M118 26 C128 28 136 34 140 42', 1.6, 0.5),
+        };
+      case 'bob':
+        return {
+          back: `<path d="M100 12 C54 12 32 44 32 92 C32 118 28 136 22 150 C46 162 72 156 80 144 L120 144 C128 156 154 162 178 150 C172 136 168 118 168 92 C168 44 146 12 100 12Z" fill="${f}"/>`,
+          front: `<path d="M56 80 C50 42 72 16 102 16 C132 16 152 40 144 80 C142 66 134 56 118 52 C108 58 88 60 72 56 C66 62 60 70 56 80Z" fill="${f}"/>` +
+            sh('M70 34 C84 24 108 22 126 30', 1.8, 0.55) + sh('M40 100 C38 122 36 136 30 148', 1.6, 0.4),
+        };
+      case 'buns':
+        return {
+          back: bumps([[58, 26, 18], [142, 26, 18]]) + sh('M48 20 C52 14 60 12 66 14', 1.8, 0.55) + sh('M134 14 C140 12 148 14 152 20', 1.8, 0.55),
+          front: `<path d="M55 80 C48 40 70 16 100 16 C130 16 152 40 145 80 C143 66 136 56 124 52 C112 58 88 58 76 52 C64 56 57 66 55 80Z" fill="${f}"/>` +
+            `<path d="M55 80 C52 96 54 108 58 116 C60 100 60 90 55 80Z" fill="${f}"/><path d="M145 80 C148 96 146 108 142 116 C140 100 140 90 145 80Z" fill="${f}"/>` +
+            sh('M70 30 C84 22 108 22 126 28', 1.8, 0.55),
+        };
+      case 'ponytail':
+        return {
+          back: `<path d="M136 38 C172 38 188 72 180 108 C176 130 164 146 152 156 C158 132 160 108 150 86 C146 72 140 56 136 38Z" fill="${f}"/>` +
+            sh('M160 56 C172 76 174 100 166 124', 1.6, 0.45),
+          front: `<path d="M57 78 C50 42 72 14 104 14 C136 14 152 38 144 76 C142 64 134 52 120 46 C106 54 84 54 68 60 C62 66 60 72 57 78Z" fill="${f}"/>` +
+            `<circle cx="144" cy="52" r="5" fill="#ff6b81"/>` + sh('M72 36 C86 24 108 22 126 30', 1.8, 0.6),
+        };
+      case 'braids': {
+        const braid = (x) => {
+          let s = '';
+          for (let i = 0; i < 6; i++) s += `<ellipse cx="${x + (i % 2 ? 2.5 : -2.5)}" cy="${122 + i * 13}" rx="8.5" ry="8" transform="rotate(${i % 2 ? 14 : -14} ${x} ${122 + i * 13})"/>`;
+          return `<g fill="${f}">${s}</g><circle cx="${x}" cy="${122 + 6 * 13}" r="4.5" fill="#ff6b81"/>`;
+        };
+        return {
+          back: `<path d="M100 14 C56 14 34 46 34 90 C34 110 38 124 48 134 L152 134 C162 124 166 110 166 90 C166 46 144 14 100 14Z" fill="${f}"/>`,
+          front: `<path d="M108 17 C80 17 60 35 56 66 C54 82 56 98 54 114 C62 100 68 84 70 64 C76 44 94 30 108 28Z" fill="${f}"/>` +
+            `<path d="M108 17 C134 17 153 35 156 64 C158 80 156 98 158 114 C150 100 142 84 140 64 C134 44 120 30 108 28Z" fill="${f}"/>` +
+            braid(52) + braid(148) + sh('M98 22 C78 27 63 44 61 66', 1.8, 0.55),
+        };
+      }
+      case 'pompadour':
+        return {
+          back: '',
+          front: `<path d="M56 78 C44 34 62 2 104 2 C148 2 160 36 144 78 C142 60 134 48 118 42 C100 36 76 42 66 58 C60 64 58 70 56 78Z" fill="${f}"/>` +
+            sh('M66 30 C80 12 112 8 134 22', 2, 0.6) + sh('M60 52 C66 36 80 26 96 22', 1.6, 0.45),
+        };
+      case 'mohawk':
+        return {
+          back: '',
+          front: `<path d="M58 78 C52 44 74 24 100 24 C126 24 148 44 142 78 C140 60 128 46 100 46 C72 46 60 60 58 78Z" fill="${h.base}" fill-opacity=".35"/>` +
+            `<path d="M82 52 C78 28 86 6 100 0 C114 6 122 28 118 52 C110 44 90 44 82 52Z" fill="${f}"/>` +
+            sh('M96 6 C90 20 90 34 92 46', 1.8, 0.7),
+        };
+      case 'buzz':
+        return {
+          back: '',
+          front: `<path d="M58 78 C52 44 74 20 100 20 C126 20 148 44 142 78 C140 62 128 50 100 48 C72 50 60 62 58 78Z" fill="${h.base}" fill-opacity=".85"/>`,
+        };
+      default: // bald
+        return { back: '', front: '' };
+    }
+  }
+
+  /* ---------- hats ---------- */
+  function hatParts(u, key, cloth) {
+    const f = `url(#${u}-cloth)`;
+    switch (key) {
+      case 'songkok':
+        return '<path d="M60 56 L64 22 C82 14 118 14 136 22 L140 56 C120 62 80 62 60 56Z" fill="#1c1a21"/>' +
+          '<path d="M60 56 C80 62 120 62 140 56" fill="none" stroke="#3b3844" stroke-width="2.4"/>' +
+          '<path d="M70 26 C86 20 114 20 130 26" fill="none" stroke="#4a4654" stroke-width="2" stroke-linecap="round" stroke-opacity=".7"/>';
+      case 'cap':
+        return `<path d="M58 38 C54 10 78 1 100 1 C124 1 146 10 142 38 C126 32 74 32 58 38Z" fill="${f}"/>` +
+          `<path d="M54 37 C70 43 130 43 146 37 C152 41 152 45 142 47 C120 50 80 50 58 47 C48 45 48 41 54 37Z" fill="${cloth.dark}"/>` +
+          `<circle cx="100" cy="2" r="3.6" fill="${cloth.dark}"/>` +
+          `<path d="M70 20 C80 12 96 9 108 11" fill="none" stroke="${cloth.light}" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>`;
+      case 'beanie':
+        return `<path d="M56 62 C50 24 78 8 100 8 C124 8 150 24 144 62Z" fill="${f}"/>` +
+          `<rect x="52" y="52" width="96" height="16" rx="8" fill="${cloth.dark}"/>` +
+          '<g stroke="#fff" stroke-opacity=".18" stroke-width="2">' + [66, 80, 94, 108, 122, 136].map((x) => `<path d="M${x} 56 L${x} 64"/>`).join('') + '</g>' +
+          `<circle cx="100" cy="6" r="8" fill="${cloth.light}"/>`;
+      default:
+        return '';
+    }
+  }
+
+  /* ---------- outfit ---------- */
+  function outfitParts(u, key, c, clothKey) {
+    const f = `url(#${u}-cloth)`;
+    switch (key) {
+      case 'halter':
+        return `<path d="M24 200 C26 166 50 148 80 142 L120 142 C150 148 174 166 176 200Z" fill="url(#${u}-neck)"/>` +
+          `<path d="M84 136 L116 136 C122 152 142 172 152 200 L50 200 C60 172 78 152 84 136Z" fill="${f}"/>` +
+          [60, 70, 80, 90, 100, 110, 120, 130, 140].map((x, i) => `<path d="M${100 + (x - 100) * 0.55} 140 L${x} 200" stroke="${c.dark}" stroke-opacity="${i % 2 ? 0.14 : 0.28}" stroke-width="1.4" fill="none"/>`).join('') +
+          `<rect x="81" y="121" width="38" height="17" rx="8" fill="${f}"/>` +
+          `<rect x="81" y="121" width="38" height="17" rx="8" fill="none" stroke="${c.dark}" stroke-opacity=".3" stroke-width="1.4"/>` +
+          `<path d="M86 126 C96 124 108 124 114 126" fill="none" stroke="${c.light}" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/>`;
+      case 'tank':
+        return `<path d="M24 200 C26 166 50 148 80 142 L120 142 C150 148 174 166 176 200Z" fill="url(#${u}-neck)"/>` +
+          `<path d="M70 200 L72 162 C74 152 78 144 82 138 L90 138 C92 150 108 150 110 138 L118 138 C122 144 126 152 128 162 L130 200Z" fill="${f}"/>` +
+          `<path d="M90 138 C92 150 108 150 110 138" fill="none" stroke="${c.dark}" stroke-opacity=".4" stroke-width="2.4" stroke-linecap="round"/>` +
+          `<path d="M78 166 C80 160 84 154 88 150" fill="none" stroke="${c.light}" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>`;
+      case 'hoodie':
+        return `<path d="M24 200 C26 164 50 146 76 140 C80 150 90 154 100 154 C110 154 120 150 124 140 C150 146 174 164 176 200Z" fill="${f}"/>` +
+          `<path d="M66 138 C70 126 84 122 100 122 C116 122 130 126 134 138 C128 150 114 156 100 156 C86 156 72 150 66 138Z" fill="${c.dark}"/>` +
+          `<path d="M76 140 C82 152 118 152 124 140" fill="none" stroke="${c.dark}" stroke-opacity=".6" stroke-width="2.4"/>` +
+          `<path d="M90 156 L88 178 M110 156 L112 178" stroke="${c.light}" stroke-width="2.4" stroke-linecap="round"/>` +
+          `<path d="M40 176 C42 168 48 160 56 156" fill="none" stroke="${c.light}" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>`;
+      case 'collar':
+        return `<path d="M24 200 C26 166 50 148 80 142 L120 142 C150 148 174 166 176 200Z" fill="${f}"/>` +
+          `<path d="M80 142 L100 166 L92 140Z" fill="#fff" stroke="${c.dark}" stroke-opacity=".3" stroke-width="1.2" stroke-linejoin="round"/>` +
+          `<path d="M120 142 L100 166 L108 140Z" fill="#fff" stroke="${c.dark}" stroke-opacity=".3" stroke-width="1.2" stroke-linejoin="round"/>` +
+          `<path d="M100 166 L100 200" stroke="${c.dark}" stroke-opacity=".35" stroke-width="1.6"/>` +
+          `<circle cx="100" cy="178" r="1.8" fill="${c.dark}" fill-opacity=".6"/><circle cx="100" cy="190" r="1.8" fill="${c.dark}" fill-opacity=".6"/>`;
+      case 'suit': {
+        const tie = clothKey === 'red' ? '#f1d53a' : '#e5484d';
+        return `<path d="M20 200 C22 164 48 146 78 140 L122 140 C152 146 178 164 180 200Z" fill="${f}"/>` +
+          '<path d="M82 141 L100 186 L118 141 L108 139 L92 139Z" fill="#fff"/>' +
+          `<path d="M78 141 L96 190 L90 200 L66 200 Z" fill="${c.dark}" fill-opacity=".55"/><path d="M122 141 L104 190 L110 200 L134 200 Z" fill="${c.dark}" fill-opacity=".55"/>` +
+          `<path d="M94 148 L106 148 L104 156 L96 156Z" fill="${tie}"/><path d="M96 156 L104 156 L107 176 L100 190 L93 176Z" fill="${tie}"/>` +
+          '<path d="M96 148 L104 148" stroke="#fff" stroke-opacity=".4" stroke-width="1.4"/>';
+      }
+      default: // tee
+        return `<path d="M24 200 C26 166 50 148 80 142 C90 156 110 156 120 142 C150 148 174 166 176 200Z" fill="${f}"/>` +
+          `<path d="M80 142 C90 158 110 158 120 142" fill="none" stroke="${c.dark}" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>` +
+          `<path d="M36 178 C40 168 46 160 54 156" fill="none" stroke="${c.light}" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>`;
+    }
+  }
+
+  /* ---------- expressions ---------- */
+  function bustMoods(u, p) {
+    const { lx, rx, ey, my } = p;
+    const ink = '#14131a';
+    const stroke = (d, w = 3, col = ink) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const brow = (d) => stroke(d, p.browW, p.browColor);
+    const g = (n, body) => `<g class="mood m-${n}">${body}</g>`;
+    const ar = p.browArch;
+
+    const lashes = (x) => {
+      if (!p.lashes) return '';
+      const o = x < 100 ? -1 : 1;
+      return `<path d="M${x + o * 5.6} ${ey - 5.4} L${x + o * 10} ${ey - 9.2} M${x + o * 6.2} ${ey - 2} L${x + o * 11} ${ey - 3.8}" fill="none" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
+    };
+    const eye = (x) =>
+      `<rect x="${x - 6.2}" y="${ey - 7.8}" width="12.4" height="15.6" rx="6.2" fill="url(#${u}-eye)"/>` +
+      `<ellipse cx="${x - 1.8}" cy="${ey - 3.8}" rx="1.9" ry="2.5" fill="#fff" opacity=".85"/>` +
+      `<ellipse cx="${x + 2}" cy="${ey + 4.2}" rx="1.4" ry=".9" fill="#8fb0ff" opacity=".4"/>` + lashes(x);
+    const browsIdle = (dy = 0) =>
+      brow(`M${lx - 12} ${ey - 14 + dy} Q${lx - 1} ${ey - 21 - ar + dy} ${lx + 10} ${ey - 17 + dy}`) +
+      brow(`M${rx - 10} ${ey - 17 + dy} Q${rx + 1} ${ey - 21 - ar + dy} ${rx + 12} ${ey - 14 + dy}`);
+    const browsAngry = () =>
+      brow(`M${lx - 12} ${ey - 19} L${lx + 9} ${ey - 12}`) + brow(`M${rx + 12} ${ey - 19} L${rx - 9} ${ey - 12}`);
+    const mouthW = p.mouthW;
+
+    const idle = eye(lx) + eye(rx) + browsIdle() + stroke(`M${100 - 14} ${my} Q100 ${my + 4.5} ${100 + 14} ${my - 1}`, mouthW, p.mouthColor);
+
+    const hurt =
+      stroke(`M${lx - 6} ${ey - 6} L${lx + 5} ${ey} L${lx - 6} ${ey + 6}`, 3.6) +
+      stroke(`M${rx + 6} ${ey - 6} L${rx - 5} ${ey} L${rx + 6} ${ey + 6}`, 3.6) +
+      browsAngry() +
+      `<path d="M${100 - 14} ${my - 2} Q100 ${my + 17} ${100 + 14} ${my - 2} Q100 ${my - 6} ${100 - 14} ${my - 2}Z" fill="#5a1d1d"/>` +
+      `<ellipse cx="100" cy="${my + 7}" rx="6" ry="3" fill="#e9667a"/>`;
+
+    const squeeze =
+      stroke(`M${lx - 6} ${ey} Q${lx} ${ey + 6} ${lx + 6} ${ey}`, 2.8) +
+      stroke(`M${rx - 6} ${ey} Q${rx} ${ey + 6} ${rx + 6} ${ey}`, 2.8) +
+      browsIdle(-1) +
+      stroke(`M${100 - 14} ${my} q3.5 -5 7 0 t7 0 t7 0 t7 0`, mouthW, p.mouthColor) +
+      `<path d="M146 34 q5 8 0 13 q-5 -5 0 -13z" fill="#8fd3ff" stroke="#fff" stroke-width="1"/>`;
+
+    const happy =
+      stroke(`M${lx - 6} ${ey + 3} Q${lx} ${ey - 6} ${lx + 6} ${ey + 3}`, 3) +
+      stroke(`M${rx - 6} ${ey + 3} Q${rx} ${ey - 6} ${rx + 6} ${ey + 3}`, 3) +
+      browsIdle(-2) +
+      `<path d="M${100 - 17} ${my - 3} Q100 ${my + 21} ${100 + 17} ${my - 3} Z" fill="#5a1d1d"/>` +
+      `<path d="M${100 - 10} ${my + 8} Q100 ${my + 2} ${100 + 10} ${my + 8} Q100 ${my + 15} ${100 - 10} ${my + 8}Z" fill="#e9667a"/>`;
+
+    const dizzy =
+      stroke(`M${lx - 5} ${ey - 5} L${lx + 5} ${ey + 5} M${lx + 5} ${ey - 5} L${lx - 5} ${ey + 5}`, 3) +
+      stroke(`M${rx - 5} ${ey - 5} L${rx + 5} ${ey + 5} M${rx + 5} ${ey - 5} L${rx - 5} ${ey + 5}`, 3) +
+      browsIdle(-1) +
+      stroke(`M${100 - 14} ${my} q3.5 -4 7 0 t7 0 t7 0 t7 0`, mouthW, p.mouthColor);
+
+    const stink =
+      `<circle cx="${lx - 9}" cy="${ey + 17}" r="9" fill="#9ccf4a" opacity=".7"/><circle cx="${rx + 9}" cy="${ey + 17}" r="9" fill="#9ccf4a" opacity=".7"/>` +
+      stroke(`M${lx - 7} ${ey} L${lx + 7} ${ey}`, 3.2) + stroke(`M${rx - 7} ${ey} L${rx + 7} ${ey}`, 3.2) +
+      browsAngry() +
+      stroke(`M${100 - 12} ${my + 5} Q100 ${my - 4} ${100 + 12} ${my + 5}`, mouthW + 0.2, p.mouthColor) +
+      stroke('M22 62 q-6 -8 0 -16 t0 -16', 2.4, '#7fae2c') + stroke('M178 62 q6 -8 0 -16 t0 -16', 2.4, '#7fae2c');
+
+    return g('idle', idle) + g('hurt', hurt) + g('squeeze', squeeze) + g('happy', happy) + g('dizzy', dizzy) + g('stink', stink);
+  }
+
+  /* ---------- one avatar ---------- */
+  function bustSvg(def, mood = 'idle', decorative = false) {
+    const u = 'b' + (++svgUid);
+    const gender = def.gender || 'neutral';
+    const skin = SKINS[def.skin] || SKINS.tan;
+    const hairC = HAIRS[def.hair] || HAIRS.black;
+    const cloth = CLOTHS[def.cloth] || CLOTHS.teal;
+    const hair = hairParts(u, def.hairStyle, hairC, cloth);
+    const body = outfitParts(u, def.outfit, cloth, def.cloth);
+    const male = gender === 'male';
+    const female = gender === 'female';
+
+    const faceP = {
+      lx: 81, rx: 119, ey: 68, my: 105,
+      browColor: hairC.brow,
+      browW: male ? 6.4 : female ? 4.4 : 5.4,
+      browArch: female ? 3 : male ? -1 : 0,
+      mouthColor: female ? '#b3474a' : '#8e3f35',
+      mouthW: female ? 2.3 : 2,
+      lashes: female,
+    };
+
+    const headPath = male
+      ? 'M100 27 C129 27 144 47 144 77 C144 100 136 118 118 124 C112 126 88 126 82 124 C64 118 56 100 56 77 C56 47 71 27 100 27Z'
+      : female
+        ? 'M100 27 C127 27 142 48 142 78 C142 106 124 125 100 125 C76 125 58 106 58 78 C58 48 73 27 100 27Z'
+        : 'M100 27 C128 27 143 48 143 78 C143 106 125 124 100 124 C75 124 57 106 57 78 C57 48 72 27 100 27Z';
+    const noseRx = male ? 12 : female ? 10 : 11;
+
+    let freckles = '';
+    if (def.freckles) {
+      freckles = '<g fill="' + skin.dark + '" fill-opacity=".55">' +
+        [[84, 84], [90, 87], [95, 82], [105, 82], [110, 87], [116, 84], [78, 90], [122, 90], [86, 92], [114, 92]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1"/>`).join('') + '</g>';
+    }
+
+    const head =
+      `<ellipse cx="${male ? 54 : 55}" cy="84" rx="${male ? 7 : 6.5}" ry="${male ? 11 : 10}" fill="url(#${u}-skin)"/><ellipse cx="${male ? 146 : 145}" cy="84" rx="${male ? 7 : 6.5}" ry="${male ? 11 : 10}" fill="url(#${u}-skin)"/>` +
+      `<path d="${headPath}" fill="url(#${u}-skin)"/>` +
+      `<circle cx="72" cy="90" r="13" fill="url(#${u}-blush)"/><circle cx="128" cy="90" r="13" fill="url(#${u}-blush)"/>` +
+      `<ellipse cx="100" cy="87" rx="${noseRx}" ry="8.2" fill="url(#${u}-nose)"/>` +
+      `<ellipse cx="97" cy="84" rx="4.2" ry="2.4" fill="#fff" opacity=".28"/>` + freckles;
+
+    const nx = male ? 18 : female ? 14 : 16;
+    const neck = hair.noNeck ? '' :
+      `<path d="M${100 - nx} 100 L${100 - nx} 140 C92 148 108 148 ${100 + nx} 140 L${100 + nx} 100Z" fill="url(#${u}-neck)"/>` +
+      `<ellipse cx="100" cy="126" rx="${nx + 10}" ry="9" fill="url(#${u}-shade)"/>`;
+
+    let beard = '';
+    if (def.beard) {
+      const bc = hairC.light;
+      beard = `<path d="M59 86 C58 118 76 136 100 136 C124 136 142 118 141 86 C136 98 128 100 118 100 C110 96 90 96 82 100 C72 100 64 98 59 86Z" fill="${bc}"/>` +
+        `<path d="M80 100 C88 94 112 94 120 100 C112 106 88 106 80 100Z" fill="${bc}"/>` +
+        `<path d="M66 100 C72 124 86 130 100 130" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.8" stroke-linecap="round"/>`;
+    }
+
+    const hat = hair.noHat ? '' : hatParts(u, def.hat, cloth);
+
+    let over = '';
+    if (def.glasses) {
+      over = `<g fill="#cfe6ff" fill-opacity=".16" stroke="#23232e" stroke-width="2.4"><circle cx="${faceP.lx}" cy="${faceP.ey}" r="15"/><circle cx="${faceP.rx}" cy="${faceP.ey}" r="15"/></g>` +
+        '<path d="M96 66 Q100 62 104 66 M66 66 L58 64 M134 66 L142 64" fill="none" stroke="#23232e" stroke-width="2.4" stroke-linecap="round"/>' +
+        '<path d="M70 58 C74 55 78 55 82 56" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.8" stroke-linecap="round"/>';
+    }
+
+    const bodyG = male ? `<g transform="translate(100 200) scale(1.1 1) translate(-100 -200)">${body}</g>` : body;
+    const a11y = decorative ? 'aria-hidden="true"' : `role="img" aria-label="${def.name}, a cartoon character"`;
+    return `<svg class="face-svg" data-mood="${mood}" viewBox="0 0 200 200" ${a11y} preserveAspectRatio="xMidYMid slice">` +
+      bustDefs(u, skin, hairC, cloth) +
+      `<rect width="200" height="200" fill="${def.bg || '#438ee0'}"/>` +
+      hair.back + bodyG + neck + head + beard + hair.front + hat + bustMoods(u, faceP) + over +
+      '</svg>';
+  }
+
+  const CLASSICS = [
     {
       id: 'putty', name: 'Putty',
       art: '<rect width="200" height="200" fill="#ffd35a"/>' +
@@ -260,9 +643,21 @@
     },
   ];
 
-  const characterById = (id) => CHARACTERS.find((c) => c.id === id) || CHARACTERS[0];
+  // 3D characters first, then the flat classics.
+  const CHARACTERS = BUSTS.concat(CLASSICS);
+
+  const DEFAULT_CUSTOM = {
+    gender: 'neutral', bg: '#ffd166', skin: 'tan', hair: 'brown', hairStyle: 'shortSwoop',
+    outfit: 'hoodie', cloth: 'teal', hat: 'none', glasses: false, beard: false, freckles: false,
+  };
+
+  function characterById(id) {
+    if (id === 'custom') return Object.assign({ id: 'custom', name: 'Custom' }, DEFAULT_CUSTOM, state.custom || {});
+    return CHARACTERS.find((c) => c.id === id) || CHARACTERS[0];
+  }
 
   function characterSvg(def, mood = 'idle', decorative = false) {
+    if (def.hairStyle) return bustSvg(def, mood, decorative);
     const a11y = decorative ? 'aria-hidden="true"' : `role="img" aria-label="${def.name}, a cartoon character"`;
     return `<svg class="face-svg" data-mood="${mood}" viewBox="0 0 200 200" ${a11y} preserveAspectRatio="xMidYMid slice">${def.art}${moodGroups(def.face)}</svg>`;
   }
@@ -1186,6 +1581,7 @@
   }
 
   function refreshFace() {
+    splats.replaceChildren(); // a new face starts clean
     if (state.mode === 'photo' && state.photo) showPhoto(state.photo);
     else showCharacter();
     removeBtn.hidden = !state.photo;
@@ -1288,20 +1684,64 @@
    * Character picker and name
    * ------------------------------------------------------------------ */
   const picker = $('#chars');
-  const nameInput = $('#avatarName');
-  const namePlate = $('#nameplate');
+  const pickerClassic = $('#charsClassic');
+  const doodles = $('#doodles');
+  const makerBody = $('#makerBody');
+  const makerCtl = {};
+  const GENDER_LABEL = { female: 'female', male: 'male', neutral: 'non-binary' };
+  const MAKER_KEYS = ['gender', 'bg', 'skin', 'hair', 'hairStyle', 'outfit', 'cloth', 'hat', 'glasses', 'beard', 'freckles'];
+
+  const OPTION_LISTS = {
+    gender: [['female', 'Female'], ['male', 'Male'], ['neutral', 'Non-binary']],
+    hairStyle: [
+      ['longParted', 'Long, parted'], ['curlyLong', 'Long curls'], ['bob', 'Bob'], ['ponytail', 'Ponytail'],
+      ['braids', 'Braids'], ['buns', 'Buns'], ['afro', 'Curly puff'], ['shortSwoop', 'Short swoop'],
+      ['curlyTop', 'Curly top'], ['pompadour', 'Quiff'], ['mohawk', 'Mohawk'], ['buzz', 'Buzz cut'],
+      ['hijab', 'Hijab'], ['bald', 'Bald'],
+    ],
+    outfit: [['tee', 'T-shirt'], ['hoodie', 'Hoodie'], ['collar', 'Collared shirt'], ['suit', 'Suit and tie'], ['halter', 'Ribbed top'], ['tank', 'Tank top']],
+    hat: [['none', 'No hat'], ['songkok', 'Songkok'], ['cap', 'Cap'], ['beanie', 'Beanie']],
+  };
+  const BG_CHOICES = [
+    ['#438ee0', 'Blue'], ['#2fb8a6', 'Teal'], ['#7fcf6a', 'Green'], ['#ffd166', 'Yellow'], ['#ff8f6b', 'Coral'],
+    ['#f4a3b5', 'Pink'], ['#9a8cf0', 'Purple'], ['#c9d1e3', 'Grey'], ['#2b2f5e', 'Midnight'],
+  ];
+  const nice = (k) => k.charAt(0).toUpperCase() + k.slice(1);
 
   function isSelected(id) {
     const usingPhoto = state.mode === 'photo' && !!state.photo;
     return id === 'photo' ? usingPhoto : !usingPhoto && state.character === id;
   }
 
+  // The settings the maker shows: the current person, or the saved custom one for the doodles.
+  function currentParams() {
+    const d = characterById(state.character);
+    const base = d.hairStyle ? d : characterById('custom');
+    const out = {};
+    MAKER_KEYS.forEach((k) => { out[k] = base[k] !== undefined ? base[k] : DEFAULT_CUSTOM[k]; });
+    return out;
+  }
+
+  function syncMaker() {
+    const cur = currentParams();
+    MAKER_KEYS.forEach((k) => {
+      const c = makerCtl[k];
+      if (!c) return;
+      if (c.type === 'buttons') c.buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(cur[k]))));
+      else if (c.type === 'select') c.el.value = cur[k];
+      else c.el.checked = !!cur[k];
+    });
+  }
+
   function renderPicker() {
     picker.replaceChildren();
-    const add = (id, label, thumbNode) => {
+    pickerClassic.replaceChildren();
+
+    const add = (host, id, label, thumbNode, title) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'char';
+      b.title = title || label;
       b.setAttribute('aria-pressed', String(isSelected(id)));
       const thumb = document.createElement('span');
       thumb.className = 'thumb';
@@ -1311,7 +1751,13 @@
       cap.textContent = label;
       b.append(thumb, cap);
       b.addEventListener('click', () => chooseFace(id));
-      picker.appendChild(b);
+      host.appendChild(b);
+    };
+    const holderFor = (def) => {
+      const holder = document.createElement('span');
+      holder.className = 'thumb-svg';
+      holder.innerHTML = characterSvg(def, 'idle', true);
+      return holder;
     };
 
     if (state.photo) {
@@ -1319,15 +1765,14 @@
       img.alt = '';
       img.draggable = false;
       img.src = state.photo;
-      add('photo', 'My photo', img);
+      add(picker, 'photo', 'My photo', img);
     }
+    add(picker, 'custom', 'Custom', holderFor(characterById('custom')), 'Your own character (use Make your own)');
+    BUSTS.forEach((c) => add(picker, c.id, c.name, holderFor(c), `${c.name} (${GENDER_LABEL[c.gender] || 'character'})`));
+    CLASSICS.forEach((c) => add(pickerClassic, c.id, c.name, holderFor(c)));
 
-    CHARACTERS.forEach((c) => {
-      const holder = document.createElement('span');
-      holder.className = 'thumb-svg';
-      holder.innerHTML = characterSvg(c, 'idle', true);
-      add(c.id, c.name, holder);
-    });
+    if (CLASSICS.some((c) => c.id === state.character) && isSelected(state.character)) doodles.open = true;
+    syncMaker();
   }
 
   function chooseFace(id) {
@@ -1341,6 +1786,127 @@
     store.set('mode', state.mode);
     refreshFace();
   }
+
+  // Any change in the maker turns the current look into the editable custom character.
+  function editAvatar(patch) {
+    if (state.character !== 'custom') state.custom = currentParams();
+    Object.assign(state.custom, patch);
+    if (state.custom.hairStyle === 'hijab') state.custom.hat = 'none';
+    state.character = 'custom';
+    state.mode = 'character';
+    store.set('custom', state.custom);
+    store.set('character', 'custom');
+    store.set('mode', 'character');
+    refreshFace();
+  }
+
+  function randomAvatar() {
+    const r = (arr) => arr[(Math.random() * arr.length) | 0];
+    const gender = r(['female', 'male', 'neutral']);
+    const styles = {
+      female: ['longParted', 'curlyLong', 'bob', 'ponytail', 'braids', 'buns', 'afro', 'hijab', 'shortSwoop'],
+      male: ['shortSwoop', 'curlyTop', 'pompadour', 'mohawk', 'buzz', 'afro', 'bald'],
+      neutral: ['shortSwoop', 'curlyTop', 'bob', 'afro', 'buns', 'buzz', 'ponytail', 'bald'],
+    }[gender];
+    const hairStyle = r(styles);
+    editAvatar({
+      gender,
+      hairStyle,
+      skin: r(Object.keys(SKINS)),
+      hair: r(Object.keys(HAIRS)),
+      outfit: r(OPTION_LISTS.outfit)[0],
+      cloth: r(Object.keys(CLOTHS)),
+      bg: r(BG_CHOICES)[0],
+      hat: hairStyle !== 'hijab' && Math.random() < 0.25 ? r(['songkok', 'cap', 'beanie']) : 'none',
+      glasses: Math.random() < 0.25,
+      beard: gender === 'male' ? Math.random() < 0.3 : Math.random() < 0.04,
+      freckles: Math.random() < 0.2,
+    });
+  }
+
+  function buildMaker() {
+    const row = (title) => {
+      const el = document.createElement('div');
+      el.className = 'opt';
+      const t = document.createElement('span');
+      t.className = 'opt-title';
+      t.textContent = title;
+      el.appendChild(t);
+      makerBody.appendChild(el);
+      return el;
+    };
+    const buttons = (key, title, list, kind) => {
+      const host = row(title);
+      const wrap = document.createElement('div');
+      wrap.className = kind === 'seg' ? 'seg' : 'swatches';
+      const btns = list.map(([v, label, color]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.v = v;
+        b.title = label;
+        b.setAttribute('aria-pressed', 'false');
+        if (kind === 'seg') {
+          b.textContent = label;
+        } else {
+          b.className = 'swatch';
+          b.style.background = color;
+          b.setAttribute('aria-label', label);
+        }
+        b.addEventListener('click', () => editAvatar({ [key]: v }));
+        wrap.appendChild(b);
+        return b;
+      });
+      host.appendChild(wrap);
+      makerCtl[key] = { type: 'buttons', buttons: btns };
+    };
+    const select = (key, title, list) => {
+      const host = row(title);
+      const el = document.createElement('select');
+      el.setAttribute('aria-label', title);
+      list.forEach(([v, label]) => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = label;
+        el.appendChild(o);
+      });
+      el.addEventListener('change', () => editAvatar({ [key]: el.value }));
+      host.appendChild(el);
+      makerCtl[key] = { type: 'select', el };
+    };
+
+    buttons('gender', 'Gender', OPTION_LISTS.gender, 'seg');
+    buttons('skin', 'Skin tone', Object.keys(SKINS).map((k) => [k, nice(k), SKINS[k].base]), 'sw');
+    select('hairStyle', 'Hair style', OPTION_LISTS.hairStyle);
+    buttons('hair', 'Hair color', Object.keys(HAIRS).map((k) => [k, nice(k), HAIRS[k].light]), 'sw');
+    select('outfit', 'Outfit', OPTION_LISTS.outfit);
+    buttons('cloth', 'Outfit color (also the hijab)', Object.keys(CLOTHS).map((k) => [k, nice(k), CLOTHS[k].base]), 'sw');
+    select('hat', 'Hat', OPTION_LISTS.hat);
+    buttons('bg', 'Background', BG_CHOICES.map(([c, l]) => [c, l, c]), 'sw');
+
+    const checksRow = row('Extras');
+    const wrap = document.createElement('div');
+    wrap.className = 'opt-checks';
+    [['glasses', 'Glasses'], ['beard', 'Beard'], ['freckles', 'Freckles']].forEach(([key, label]) => {
+      const l = document.createElement('label');
+      l.className = 'check';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.addEventListener('change', () => editAvatar({ [key]: input.checked }));
+      l.append(input, document.createTextNode(' ' + label));
+      wrap.appendChild(l);
+      makerCtl[key] = { type: 'check', el: input };
+    });
+    checksRow.appendChild(wrap);
+
+    const surprise = document.createElement('button');
+    surprise.type = 'button';
+    surprise.className = 'btn secondary';
+    surprise.textContent = 'Surprise me';
+    surprise.addEventListener('click', randomAvatar);
+    makerBody.appendChild(surprise);
+  }
+
+  buildMaker();
 
   function updateNamePlate() {
     const n = state.name.trim();
@@ -1410,7 +1976,9 @@
   syncSliders();
   dizzy.innerHTML = dizzySvg();
   state.photo = store.get('photo', null);
-  state.character = characterById(store.get('character', 'putty')).id;
+  const savedCustom = store.get('custom', {});
+  state.custom = Object.assign({}, DEFAULT_CUSTOM, savedCustom && typeof savedCustom === 'object' ? savedCustom : {});
+  state.character = characterById(store.get('character', 'sunny')).id;
   state.mode = store.get('mode', 'photo') === 'character' ? 'character' : 'photo';
   state.name = String(store.get('name', '')).slice(0, 24);
   nameInput.value = state.name;

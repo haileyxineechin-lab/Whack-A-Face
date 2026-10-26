@@ -62,13 +62,22 @@
       <aside class="panel">
         <div>
           <h2>Your character</h2>
-          <p>Pick a character, give it a name, attach a photo, or mix them: a name works with a character or a photo.</p>
+          <p>Pick a character or make your own, give it a name, attach a photo, or mix them: a name works with any character or photo.</p>
         </div>
 
         <div class="group">
           <span class="group-title" id="charsTitle">Choose a character</span>
           <div class="chars" id="chars" role="group" aria-labelledby="charsTitle"></div>
+          <details class="doodles" id="doodles">
+            <summary>Classic doodles</summary>
+            <div class="chars" id="charsClassic" role="group" aria-label="Classic doodle characters"></div>
+          </details>
         </div>
+
+        <details class="maker" id="maker">
+          <summary>Make your own</summary>
+          <div class="maker-body" id="makerBody"></div>
+        </details>
 
         <label class="field">Name (optional)
           <input type="text" id="avatarName" maxlength="24" placeholder="Give it a name" autocomplete="off">
